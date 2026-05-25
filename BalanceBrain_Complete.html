@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BalanceBrain</title>
+<style>
+body{font-family:Segoe UI,sans-serif;background:linear-gradient(135deg,#ff9a9e,#fad0c4,#a1c4fd);margin:0;padding:20px}
+.card{max-width:1100px;margin:auto;background:#fff;border-radius:20px;padding:20px;box-shadow:0 10px 25px rgba(0,0,0,.15)}
+h1,h2{text-align:center;color:#673ab7}
+input,select,button{padding:10px;border-radius:10px;border:1px solid #ccc;margin:5px}
+button{background:#673ab7;color:#fff;cursor:pointer}
+.hidden{display:none}
+.coin{width:70px;height:70px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
+background:linear-gradient(145deg,#ffd700,#ffb300);margin:5px;font-weight:bold;cursor:pointer}
+.left{outline:4px solid #2196f3}
+.right{outline:4px solid #f44336}
+#coins{text-align:center}
+.panel{background:#eef7ff;padding:15px;border-radius:15px;margin-top:15px}
+</style>
+</head>
+<body>
+<div class="card">
+<h1>🧠 BalanceBrain</h1>
+
+<div id="startPage">
+<h2>ข้อมูลผู้เข้าร่วม</h2>
+<input id="nickname" placeholder="ชื่อเล่น"><br>
+<input id="age" type="number" placeholder="อายุ"><br>
+<select id="gender"><option value="">เพศ</option><option>ชาย</option><option>หญิง</option><option>อื่น ๆ</option></select><br>
+<select id="education"><option value="">ระดับการศึกษา</option><option>มัธยมต้น</option><option>มัธยมปลาย</option><option>ปวช.</option><option>ปวส.</option><option>ปริญญาตรี</option></select><br>
+<button onclick="startGame()">เริ่มเกม</button>
+</div>
+
+<div id="gamePage" class="hidden">
+<h2>⚖️ เกมตาชั่ง 12 เหรียญ</h2>
+<p>คลิกเหรียญ: 1 ครั้ง=ซ้าย | 2 ครั้ง=ขวา | 3 ครั้ง=เอาออก</p>
+<h3>⏱ เวลา: <span id="timer">0</span> วินาที</h3>
+
+<div id="coins"></div>
+
+<button onclick="weigh()">ชั่งน้ำหนัก</button>
+<p id="result"></p>
+
+<div class="panel">
+<h3>🤖 AI Assistant</h3>
+<p id="feedback">เริ่มวางเหรียญบนตาชั่งได้เลย</p>
+</div>
+
+<div class="panel">
+<h3>🎯 ตอบคำถาม</h3>
+<select id="guessCoin">
+<option value="">เลือกเหรียญพิเศษ</option>
+</select>
+
+<select id="guessType">
+<option value="">เลือกประเภท</option>
+<option value="heavy">หนักกว่าปกติ</option>
+<option value="light">เบากว่าปกติ</option>
+</select>
+
+<button onclick="submitAnswer()">ส่งคำตอบ</button>
+</div>
+
+<div class="panel">
+<h3>📊 ผลการประเมิน</h3>
+<div id="summary">ยังไม่มีข้อมูล</div>
+</div>
+</div>
+</div>
+
+<script>
+let player={};
+let states=Array(12).fill(0);
+let specialCoin=Math.floor(Math.random()*12);
+let weightType=Math.random()>0.5?1:-1;
+let weighCount=0,timer=0,timerInterval;
+let history=[];
+
+function startGame(){
+player.nickname=nickname.value;
+player.age=age.value;
+player.gender=gender.value;
+player.education=education.value;
+
+if(!player.nickname||!player.age||!player.gender||!player.education){
+alert("กรอกข้อมูลให้ครบ");
+return;
+}
+
+startPage.classList.add("hidden");
+gamePage.classList.remove("hidden");
+
+for(let i=0;i<12;i++){
+ let c=document.createElement("div");
+ c.className="coin";
+ c.textContent=i+1;
+ c.onclick=()=>toggleCoin(i,c);
+ coins.appendChild(c);
+}
+
+for(let i=1;i<=12;i++){
+ let op=document.createElement("option");
+ op.value=i;
+ op.text=i;
+ guessCoin.appendChild(op);
+}
+
+timerInterval=setInterval(()=>{
+ timer++;
+ document.getElementById("timer").textContent=timer;
+},1000);
+}
+
+function toggleCoin(i,el){
+states[i]=(states[i]+1)%3;
+el.className="coin";
+if(states[i]===1) el.classList.add("left");
+if(states[i]===2) el.classList.add("right");
+}
+
+function weight(i){
+return i===specialCoin ? 1+(0.2*weightType) : 1;
+}
+
+function weigh(){
+weighCount++;
+let L=0,R=0;
+
+for(let i=0;i<12;i++){
+ if(states[i]===1) L+=weight(i);
+ if(states[i]===2) R+=weight(i);
+}
+
+let res="";
+if(Math.abs(L-R)<0.01) res="สมดุล";
+else if(L>R) res="เอียงซ้าย";
+else res="เอียงขวา";
+
+history.push({round:weighCount,result:res});
+
+result.textContent="การชั่งครั้งที่ "+weighCount+" : "+res;
+
+feedback.textContent =
+res==="สมดุล"
+? "เหรียญที่ไม่ได้อยู่บนตาชั่งน่าสงสัยมากขึ้น"
+: "ลองเปรียบเทียบเหรียญที่อยู่ในฝั่งที่หนักหรือเบากว่า";
+}
+
+function submitAnswer(){
+
+clearInterval(timerInterval);
+
+const coinGuess=Number(guessCoin.value);
+const typeGuess=guessType.value;
+
+const correctCoin=specialCoin+1;
+const correctType=weightType===1?"heavy":"light";
+
+const correct=(coinGuess===correctCoin && typeGuess===correctType);
+
+const accuracy=correct?100:0;
+
+let timeScore=100;
+if(timer>60) timeScore=80;
+if(timer>120) timeScore=60;
+if(timer>180) timeScore=40;
+
+const finalScore=Math.round((accuracy*0.7)+(timeScore*0.3));
+
+summary.innerHTML=`
+<b>ผลลัพธ์:</b> ${correct?"✅ ถูกต้อง":"❌ ไม่ถูกต้อง"}<br>
+เวลา: ${timer} วินาที<br>
+จำนวนการชั่ง: ${weighCount}<br>
+เหรียญพิเศษจริง: ${correctCoin}<br>
+ประเภทจริง: ${correctType==="heavy"?"หนักกว่า":"เบากว่า"}<br>
+คะแนนรวม: ${finalScore}
+`;
+
+const data={
+...player,
+timeSpent:timer,
+weighCount,
+guessCoin:coinGuess,
+guessType:typeGuess,
+correctCoin,
+correctType,
+accuracy,
+timeScore,
+finalScore,
+history
+};
+
+console.log("BalanceBrain Data",data);
+
+/* ใส่ URL Google Apps Script แล้วเปิดส่วนนี้
+fetch("YOUR_SCRIPT_URL",{
+method:"POST",
+headers:{"Content-Type":"application/json"},
+body:JSON.stringify(data)
+});
+*/
+}
+</script>
+</body>
+</html>
