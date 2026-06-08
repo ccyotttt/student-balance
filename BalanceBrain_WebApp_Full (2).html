@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BalanceBrain Web Application</title>
+<style>
+body{margin:0;font-family:Segoe UI,sans-serif;background:linear-gradient(135deg,#4f46e5,#2563eb);color:#222}
+.page{display:none;padding:20px;max-width:1200px;margin:auto}
+.active{display:block}
+.card{background:#fff;border-radius:18px;padding:20px;margin:15px 0;box-shadow:0 8px 20px rgba(0,0,0,.15)}
+h1,h2,h3{color:#4f46e5}
+.center{text-align:center}
+.btn{background:#4f46e5;color:#fff;border:none;padding:12px 20px;border-radius:10px;cursor:pointer}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.coins{display:grid;grid-template-columns:repeat(4,1fr);gap:10px}
+.coin{width:70px;height:70px;border-radius:50%;background:gold;display:flex;align-items:center;justify-content:center;margin:auto;font-weight:bold;cursor:pointer}
+.left{outline:4px solid #2563eb}
+.right{outline:4px solid #ef4444}
+input,select{width:100%;padding:10px;margin:5px 0;border-radius:8px;border:1px solid #ccc}
+table{width:100%;border-collapse:collapse}
+td,th{border:1px solid #ddd;padding:8px}
+</style>
+</head>
+<body>
+
+<div id="home" class="page active">
+<div class="card center">
+<h1>🧠 BalanceBrain</h1>
+<p>AI-Powered Analytical Thinking Assessment System</p>
+<p>ระบบประเมินทักษะการคิดวิเคราะห์ผ่านเกมตาชั่ง 12 เหรียญ</p>
+<button class="btn" onclick="showPage('intro')">เริ่มต้นใช้งาน</button>
+</div>
+</div>
+
+<div id="intro" class="page">
+<div class="card">
+<h2>📌 วัตถุประสงค์</h2>
+<ul>
+<li>ประเมินการคิดวิเคราะห์</li>
+<li>ประเมินการใช้เหตุผลเชิงตรรกะ</li>
+<li>ประเมินการแก้ปัญหา</li>
+<li>ประเมินการตัดสินใจจากข้อมูล</li>
+</ul>
+<button class="btn" onclick="showPage('instruction')">ถัดไป</button>
+</div>
+</div>
+
+<div id="instruction" class="page">
+<div class="card">
+<h2>📖 คำชี้แจง</h2>
+<ol>
+<li>มีเหรียญ 12 เหรียญ และมีเหรียญพิเศษ 1 เหรียญ</li>
+<li>คลิกเหรียญครั้งที่ 1 = ฝั่งซ้าย</li>
+<li>คลิกครั้งที่ 2 = ฝั่งขวา</li>
+<li>คลิกครั้งที่ 3 = นำออก</li>
+<li>กดชั่งน้ำหนักและวิเคราะห์ผล</li>
+<li>ตอบว่าเหรียญใดหนักหรือเบากว่าปกติ</li>
+</ol>
+<button class="btn" onclick="showPage('participant')">เริ่มแบบทดสอบ</button>
+</div>
+</div>
+
+<div id="participant" class="page">
+<div class="card">
+<h2>👤 ข้อมูลผู้เข้าร่วม</h2>
+<input id="name" placeholder="ชื่อเล่น">
+<input id="age" type="number" placeholder="อายุ">
+<select id="gender">
+<option>ชาย</option><option>หญิง</option><option>อื่น ๆ</option>
+</select>
+<button class="btn" onclick="startGame()">เข้าสู่เกม</button>
+</div>
+</div>
+
+<div id="game" class="page">
+<div class="card">
+<h2>⚖️ เกมตาชั่ง 12 เหรียญ</h2>
+<p>เวลา: <span id="timer">0</span> วินาที | จำนวนครั้งชั่ง: <span id="wc">0</span></p>
+
+<div class="grid">
+<div>
+<div id="coins" class="coins"></div>
+<button class="btn" onclick="weigh()">ชั่งน้ำหนัก</button>
+<p id="result">ยังไม่มีผลการชั่ง</p>
+</div>
+
+<div>
+<div class="card">
+<h3>🤖 AI Assistant</h3>
+<p id="hint">เริ่มวิเคราะห์ได้เลย</p>
+</div>
+
+<div class="card">
+<h3>📋 ประวัติการชั่ง</h3>
+<table>
+<thead><tr><th>ครั้ง</th><th>ผล</th></tr></thead>
+<tbody id="history"></tbody>
+</table>
+</div>
+</div>
+</div>
+
+<button class="btn" onclick="showPage('answer')">ตอบคำถาม</button>
+</div>
+</div>
+
+<div id="answer" class="page">
+<div class="card">
+<h2>🎯 ตอบคำถาม</h2>
+<select id="guessCoin"></select>
+<select id="guessType">
+<option value="heavy">หนักกว่า</option>
+<option value="light">เบากว่า</option>
+</select>
+<button class="btn" onclick="finishGame()">ส่งคำตอบ</button>
+</div>
+</div>
+
+<div id="resultPage" class="page">
+<div class="card">
+<h2>📊 ผลการประเมิน</h2>
+<div id="summary"></div>
+<button class="btn" onclick="showPage('dashboard')">ดู Dashboard</button>
+</div>
+</div>
+
+<div id="dashboard" class="page">
+<div class="card">
+<h2>📈 Dashboard</h2>
+<p><b>ผู้เล่น:</b> <span id="dname"></span></p>
+<p><b>เวลา:</b> <span id="dtime"></span></p>
+<p><b>จำนวนครั้งชั่ง:</b> <span id="dweigh"></span></p>
+<p><b>คะแนน:</b> <span id="dscore"></span></p>
+<button class="btn" onclick="showPage('home')">กลับหน้าแรก</button>
+</div>
+</div>
+
+<script>
+let special=Math.floor(Math.random()*12)+1;
+let type=Math.random()>0.5?'heavy':'light';
+let timer=0,weighCount=0,interval;
+let historyData=[];
+
+function showPage(id){
+document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+document.getElementById(id).classList.add('active');
+}
+
+function startGame(){
+showPage('game');
+
+for(let i=1;i<=12;i++){
+let c=document.createElement('div');
+c.className='coin';
+c.textContent=i;
+c.dataset.state=0;
+
+c.onclick=function(){
+let s=(parseInt(c.dataset.state)+1)%3;
+c.dataset.state=s;
+c.className='coin';
+if(s===1)c.classList.add('left');
+if(s===2)c.classList.add('right');
+};
+coins.appendChild(c);
+
+let o=document.createElement('option');
+o.value=i;o.text=i;
+guessCoin.appendChild(o);
+}
+
+interval=setInterval(()=>{
+timer++;
+document.getElementById('timer').textContent=timer;
+},1000);
+}
+
+function weigh(){
+weighCount++;
+document.getElementById('wc').textContent=weighCount;
+
+let results=['สมดุล','เอียงซ้าย','เอียงขวา'];
+let r=results[Math.floor(Math.random()*results.length)];
+
+document.getElementById('result').textContent='ผลการชั่ง: '+r;
+
+document.getElementById('hint').textContent =
+r==='สมดุล'
+?'เหรียญที่ไม่ได้อยู่บนตาชั่งอาจน่าสงสัยมากขึ้น'
+:'ลองเปรียบเทียบเหรียญในฝั่งที่ทำให้เกิดความแตกต่าง';
+
+historyData.push(r);
+
+let tr=document.createElement('tr');
+tr.innerHTML='<td>'+weighCount+'</td><td>'+r+'</td>';
+history.appendChild(tr);
+}
+
+function finishGame(){
+clearInterval(interval);
+
+let correct=(Number(guessCoin.value)===special && guessType.value===type);
+let score=correct?100:30;
+
+summary.innerHTML=`
+<h3>${correct?'✅ ตอบถูกต้อง':'❌ ตอบไม่ถูกต้อง'}</h3>
+<p>เหรียญพิเศษจริง: ${special}</p>
+<p>ประเภท: ${type==='heavy'?'หนักกว่า':'เบากว่า'}</p>
+<p>เวลา: ${timer} วินาที</p>
+<p>จำนวนครั้งชั่ง: ${weighCount}</p>
+<p>คะแนน: ${score}/100</p>
+`;
+
+dname.textContent=document.getElementById('name').value;
+dtime.textContent=timer+' วินาที';
+dweigh.textContent=weighCount;
+dscore.textContent=score+'/100';
+
+localStorage.setItem('BalanceBrainPlayer',JSON.stringify({
+name:document.getElementById('name').value,
+score,timer,weighCount
+}));
+
+showPage('resultPage');
+}
+</script>
+
+</body>
+</html>
